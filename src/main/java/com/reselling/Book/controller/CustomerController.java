@@ -1,6 +1,7 @@
 package com.reselling.Book.controller;
 
-import com.reselling.Book.model.details.UserDetails;
+import com.reselling.Book.dto.LoginRequest;
+import com.reselling.Book.model.details.User;
 import com.reselling.Book.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatusCode;
@@ -15,8 +16,10 @@ public class CustomerController {
     @Autowired
     CustomerService userService;
 
+
+
     @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@RequestBody UserDetails user){
+    public ResponseEntity<String> registerUser(@RequestBody User user){
 
         try{
             userService.registerUser(user);
@@ -31,11 +34,12 @@ public class CustomerController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> loginUser(@RequestBody UserDetails user){
+    public ResponseEntity<String> loginUser(@RequestBody LoginRequest request){
 
         try{
-            userService.loginUser(user);
-            return new ResponseEntity<>(HttpStatusCode.valueOf(200));
+            String token = userService.loginUser(request.getEmail(), request.getPassword());
+//            return new ResponseEntity<>(HttpStatusCode.valueOf(200));
+            return ResponseEntity.ok(token);
         }
         catch (IllegalArgumentException | BadCredentialsException ex){
             return ResponseEntity.badRequest().body(ex.getMessage());
