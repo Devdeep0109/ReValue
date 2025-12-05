@@ -1,16 +1,15 @@
 package com.reselling.Book.service;
 
+import com.reselling.Book.dto.ProductDTO;
 import com.reselling.Book.model.products.Product;
 import com.reselling.Book.repo.ProductRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ProductService {
@@ -18,9 +17,21 @@ public class ProductService {
     @Autowired
     ProductRepo repo;
 
-    public List<Product> getAllProducts() {
+    public List<ProductDTO> getAllProducts() {
         try{
-            return repo.findAll();
+            List<Product> products = repo.findAll();
+
+            return products.stream()
+                    .map(p -> new ProductDTO(
+                            p.getId(),
+                            p.getName(),
+                            p.getCategory(),
+                            p.getPrice(),
+                            p.getCondition().toString(),
+                            p.getDescription(),
+                            p.getImageName()
+                    ))
+                    .toList();
         }
         catch (DataAccessException e){
             throw new RuntimeException("Unable to fetch: "+ e.getMessage());
@@ -53,17 +64,10 @@ public class ProductService {
         }
     }
 
-    public List<Product> searchByKeyword(String keyword) {
+    public List<ProductDTO> searchByKeyword(String keyword) {
+        List<ProductDTO> products = repo.searchByKeyword(keyword);
 
-        try{
-            List<Product> products = repo.searchByKeyword(keyword);
-            if (products.isEmpty()) {
-                throw new IllegalArgumentException("No products found matching keyword: " + keyword);
-            }
-            return products;
-        }
-        catch (DataAccessException e){
-            throw new RuntimeException("Unable to fetch Data: "+ e.getMessage());
-        }
+        return repo.searchByKeyword(keyword);
     }
+
 }

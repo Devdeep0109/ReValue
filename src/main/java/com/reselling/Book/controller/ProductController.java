@@ -2,6 +2,7 @@ package com.reselling.Book.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.reselling.Book.dto.ProductDTO;
 import com.reselling.Book.model.products.Product;
 import com.reselling.Book.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +25,9 @@ public class ProductController {
     public ResponseEntity<?> getAllProducts(){
 
         try{
-            List<Product> product = service.getAllProducts();
-            return ResponseEntity.ok(product);
+            List<ProductDTO> products = service.getAllProducts();
+            return ResponseEntity.ok(products);
+
         }
         catch(RuntimeException ex){
             return ResponseEntity.internalServerError().body(ex.getMessage());
@@ -54,8 +56,18 @@ public class ProductController {
     public ResponseEntity<?> getProductById(@PathVariable int id){
 
         try{
-            Product prod = service.getProductById(id);
-            return ResponseEntity.ok().body(prod);
+            Product p = service.getProductById(id);
+            ProductDTO dto = new ProductDTO(
+                    p.getId(),
+                    p.getName(),
+                    p.getCategory(),
+                    p.getPrice(),
+                    p.getCondition().toString(),
+                    p.getDescription(),
+                    p.getImageName()
+            );
+
+            return ResponseEntity.ok(dto);
         }
         catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -69,7 +81,7 @@ public class ProductController {
     public ResponseEntity<?> getProductByKeyword(@RequestParam String keyword){
 
         try{
-            List<Product> products = service.searchByKeyword(keyword);
+            List<ProductDTO> products = service.searchByKeyword(keyword);
             return ResponseEntity.ok().body(products);
         }
         catch (IllegalArgumentException e){
@@ -79,5 +91,15 @@ public class ProductController {
             return ResponseEntity.internalServerError().body(e.getMessage());
         }
     }
+
+    @GetMapping("/product/image/{id}")
+    public ResponseEntity<byte[]> getProductImage(@PathVariable int id) {
+        Product product = service.getProductById(id);
+
+        return ResponseEntity.ok()
+                .header("Content-Type", product.getImageType())
+                .body(product.getImageData());
+    }
+
 
 }
