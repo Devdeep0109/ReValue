@@ -1,4 +1,4 @@
-package com.reselling.Book.service;
+package com.reselling.Book.service.customerService;
 
 import com.reselling.Book.model.details.User;
 import com.reselling.Book.model.details.UserPrincipal;

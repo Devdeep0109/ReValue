@@ -38,16 +38,21 @@ public class JwtService {
         }
     }
 
-    public String generateToken(String email) {
+    public String generateToken(String email,String role) {
 
         Map<String, Object> claims = new HashMap<>();
 
+        claims.put("role", role);
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(email)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000*60*5))
-                .signWith(getKey(), SignatureAlgorithm.HS256).compact();
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // 1 hour
+                .signWith(getKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+    public String extractRole(String token) {
+        return (String) extractAllClaims(token).get("role");
     }
 
     private Key getKey() {

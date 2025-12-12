@@ -1,7 +1,8 @@
-package com.reselling.Book.service;
+package com.reselling.Book.service.sellerService;
 
-import com.reselling.Book.model.details.User;
-import com.reselling.Book.repo.UserRepo;
+import com.reselling.Book.model.details.Seller;
+import com.reselling.Book.repo.SellerRepo;
+import com.reselling.Book.service.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -13,10 +14,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-public class CustomerService {
+public class SellerService {
 
     @Autowired
-    public UserRepo repo;
+    SellerRepo repo;
 
     @Autowired
     AuthenticationManager manager;
@@ -26,33 +27,29 @@ public class CustomerService {
 
     private final BCryptPasswordEncoder encoder =new BCryptPasswordEncoder(12);
 
-    public void registerUser(User user){
+    public void registerSeller(Seller seller){
 
         try{
-            if(repo.existsByEmail(user.getEmail())){
+            if(repo.existsByEmail(seller.getEmail())){
                 throw new IllegalArgumentException("Email already Registered!");
             }
-            user.setPassword(encoder.encode(user.getPassword()));
-            repo.save(user);
+            seller.setPassword(encoder.encode(seller.getPassword()));
+            repo.save(seller);
         }
         catch(DataAccessException ex){
             throw new RuntimeException("DataBase error:"+ex.getMessage());
         }
     }
 
-    public String loginUser(String email, String password){
+    public String loginSeller(String email, String password){
         try {
             Authentication authentication = manager.authenticate(
                     new UsernamePasswordAuthenticationToken(email, password)
             );
-
-            // If authentication passed, Spring guarantees it's authenticated
-            return jwtService.generateToken(email);
+            return jwtService.generateToken(email,"SELLER");
 
         } catch (AuthenticationException ex) {
-            // Bad credentials
             throw new BadCredentialsException("Invalid username or password");
         }
     }
-
 }

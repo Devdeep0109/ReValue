@@ -1,6 +1,7 @@
 package com.reselling.Book.model.products;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.reselling.Book.model.details.Seller;
 import com.reselling.Book.model.enums.Conditions;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -40,5 +41,9 @@ public class Product {
     @Lob
 //    @Basic(fetch = FetchType.LAZY)
     private byte[] imageData;
+
+    @ManyToOne
+    @JoinColumn(name = "seller_id")
+    private Seller seller;
 
 }

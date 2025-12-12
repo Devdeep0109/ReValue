@@ -1,7 +1,8 @@
 package com.reselling.Book.config;
 
 import com.reselling.Book.service.JwtService;
-import com.reselling.Book.service.MyUserDetailsService;
+import com.reselling.Book.service.customerService.MyUserDetailsService;
+import com.reselling.Book.service.sellerService.MySellerDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,6 +27,9 @@ public class JwtFilter extends OncePerRequestFilter {
     @Autowired
     private MyUserDetailsService userDetailsService;
 
+    @Autowired
+    private MySellerDetailsService sellerDetailsService;
+
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -42,17 +46,29 @@ public class JwtFilter extends OncePerRequestFilter {
 
         String authHeader = request.getHeader("Authorization");
         String token = null;
-        String userEmail = null;
+        String email = null;
+        String role = null;
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             token = authHeader.substring(7);
-            userEmail = jwtService.extractUserName(token); // this returns email
+            email = jwtService.extractUserName(token);
+            role = jwtService.extractRole(token);    // this returns email
         }
 
         // Authenticate only if no current authentication exists
-        if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-            UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
+            UserDetails userDetails;
+
+            // ---- PICK SERVICE BASED ON ROLE ----
+            if (role.equals("USER")) {
+                userDetails = userDetailsService.loadUserByUsername(email);
+            } else if (role.equals("SELLER")) {
+                userDetails = sellerDetailsService.loadUserByUsername(email);
+            } else {
+                filterChain.doFilter(request, response);
+                return;
+            }
 
             if (jwtService.validateToken(token, userDetails)) {
 
