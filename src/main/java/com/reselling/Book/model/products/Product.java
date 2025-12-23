@@ -33,6 +33,7 @@ public class Product {
 
     private String description; // short summary about product condition
 
+
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern = "dd-MM-yy")
     private Date dom;
 

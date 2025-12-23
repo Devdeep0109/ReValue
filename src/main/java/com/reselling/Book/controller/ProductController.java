@@ -53,7 +53,7 @@ public class ProductController {
     }
 
         @GetMapping("/searchById/{id}")
-    public ResponseEntity<?> getProductById(@PathVariable int id){
+    public ResponseEntity<?> getProductById(@PathVariable Long id){
 
         try{
             Product p = service.getProductById(id);
@@ -93,7 +93,7 @@ public class ProductController {
     }
 
     @GetMapping("/product/image/{id}")
-    public ResponseEntity<byte[]> getProductImage(@PathVariable int id) {
+    public ResponseEntity<byte[]> getProductImage(@PathVariable Long id) {
         Product product = service.getProductById(id);
 
         return ResponseEntity.ok()

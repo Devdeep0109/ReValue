@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface ProductRepo extends JpaRepository<Product,Integer> {
+public interface ProductRepo extends JpaRepository<Product,Long> {
     @Query("""
 SELECT new com.reselling.Book.dto.ProductDTO(
     p.id,

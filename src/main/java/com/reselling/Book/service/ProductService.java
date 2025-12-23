@@ -1,10 +1,13 @@
 package com.reselling.Book.service;
 
 import com.reselling.Book.dto.ProductDTO;
+import com.reselling.Book.model.details.Seller;
 import com.reselling.Book.model.products.Product;
 import com.reselling.Book.repo.ProductRepo;
+import com.reselling.Book.repo.SellerRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -16,6 +19,9 @@ public class ProductService {
 
     @Autowired
     ProductRepo repo;
+
+    @Autowired
+    private SellerRepo sellerRepo;
 
     public List<ProductDTO> getAllProducts() {
         try{
@@ -41,6 +47,16 @@ public class ProductService {
     public void addProduct(Product product, MultipartFile image) {
 
         try{
+            String email = SecurityContextHolder.getContext()
+                    .getAuthentication()
+                    .getName();
+
+            Seller seller = sellerRepo.findByEmail(email)
+                    .orElseThrow(() -> new IllegalArgumentException("Seller not found"));
+
+            product.setSeller(seller);
+
+
             if(image != null && !image.isEmpty()){
                 product.setImageName(image.getOriginalFilename());
                 product.setImageType(image.getContentType());
@@ -55,7 +71,7 @@ public class ProductService {
         }
     }
 
-    public Product getProductById(int id) {
+    public Product getProductById(Long id) {
         try{
             return repo.findById(id).orElseThrow(() -> new IllegalArgumentException("Product Id Invalid!"));
         }
