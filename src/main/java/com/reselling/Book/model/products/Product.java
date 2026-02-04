@@ -43,6 +43,14 @@ public class Product {
 //    @Basic(fetch = FetchType.LAZY)
     private byte[] imageData;
 
+    //rating
+    @Column(nullable = false)
+    private Double averageRating=0.0;
+
+    @Column(nullable = false)
+    private Integer totalNoOfRatings=0;
+
+
     @ManyToOne
     @JoinColumn(name = "seller_id")
     private Seller seller;

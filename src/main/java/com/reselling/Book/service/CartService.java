@@ -1,6 +1,8 @@
 package com.reselling.Book.service;
 
 import com.reselling.Book.dto.AddToCartRequest;
+import com.reselling.Book.dto.CartItemResponse;
+import com.reselling.Book.dto.CartResponse;
 import com.reselling.Book.model.cart.CartItems;
 import com.reselling.Book.model.cart.Carts;
 import com.reselling.Book.model.details.User;
@@ -13,6 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 public class CartService {
 
@@ -23,7 +28,7 @@ public class CartService {
     private ProductRepo productRepo;
 
     @Autowired
-    private UserRepo userrepo;
+    private UserRepo userRepo;
 
     @Autowired
     private CartItemRepo itemsRepo;
@@ -32,7 +37,7 @@ public class CartService {
 
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        User user = userrepo.findByEmail(email).orElseThrow( () -> new IllegalArgumentException("User not found!"));
+        User user = userRepo.findByEmail(email).orElseThrow( () -> new IllegalArgumentException("User not found!"));
 
         Product product = productRepo.findById(request.getProductId()).orElseThrow( () -> new IllegalArgumentException("Product not found!"));
 
@@ -51,5 +56,41 @@ public class CartService {
             newItem.setPriceAtAddition(product.getPrice());
             itemsRepo.save(newItem);
         }
+    }
+
+    public CartResponse getMyCart() {
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
+        User user = userRepo.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+
+        Carts cart = cartRepo.findByUser(user)
+                .orElseThrow(() -> new IllegalArgumentException("Cart is empty"));
+
+
+        List<CartItemResponse> items = new ArrayList<>();
+        double total = 0;
+
+        for (CartItems item : cart.getItems()) {
+
+            CartItemResponse dto = new CartItemResponse();
+            dto.setCartItemId(item.getId());
+            dto.setProductId(item.getProduct().getId());
+            dto.setProductName(item.getProduct().getName());
+            dto.setPrice(item.getPriceAtAddition());
+            dto.setQuantity(item.getQuantity());
+
+            total += item.getPriceAtAddition() * item.getQuantity();
+            items.add(dto);
+        }
+        CartResponse response = new CartResponse();
+        response.setCartId(cart.getId());
+        response.setItems(items);
+        response.setTotalAmount(total);
+
+        return response;
     }
 }

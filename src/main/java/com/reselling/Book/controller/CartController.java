@@ -2,14 +2,12 @@ package com.reselling.Book.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.reselling.Book.dto.AddToCartRequest;
+import com.reselling.Book.dto.CartResponse;
 import com.reselling.Book.model.cart.CartItems;
 import com.reselling.Book.service.CartService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 @RestController
@@ -31,5 +29,10 @@ public class CartController {
         catch (RuntimeException  e) {
             return ResponseEntity.internalServerError().body(e.getMessage());
         }
+    }
+
+    @GetMapping
+    public ResponseEntity<CartResponse> getCart() {
+        return ResponseEntity.ok(service.getMyCart());
     }
 }
